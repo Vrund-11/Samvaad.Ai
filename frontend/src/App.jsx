@@ -14,39 +14,32 @@ function App() {
   }
 
   const handleSend = () => {
-    if (input.trim() === '') return
-    setHistory([...history, { user: 'You', message: input, time: getTimestamp() }])
+    if (input.trim() === '' || !socket) return;
 
     const userMessage = {
       id: Date.now(),
       text: input,
       timestamp: getTimestamp(),
-      sender: 'User'
+      sender: 'You'
     };
-    setTimeout(() => {
-      setHistory(prevHistory => [...prevHistory, userMessage]);
-    }, 500)
-
+    setHistory(prevHistory => [...prevHistory, userMessage]);
     socket.emit('User', input);
-
     setInput('');
-  }
+  };
 
   useEffect(() => {
-    var socketInstance = io('http://localhost:3000');
-    setSocket[socketInstance];
+    const socketInstance = io('http://localhost:3000');
+    setSocket(socketInstance);
 
-    socketInstance.on('ai_response', (response) => {
-
+    socketInstance.on('prompt-response', (response) => {
       const botMessage = {
-        id: 1,
+        id: Date.now(),
         text: response,
         timestamp: getTimestamp(),
         sender: 'Bot'
       };
-
       setHistory(prevHistory => [...prevHistory, botMessage]);
-    })
+    });
   }, []);
 
   return (
@@ -61,10 +54,10 @@ function App() {
         </button>
       </header>
       <div className="chat-history">
-        {history.map((msg, idx) => (
-          <div key={idx} className={`chat-msg ${msg.user === 'You' ? 'user' : 'bot'}`}>
-            <span className="chat-user">{msg.user}:</span> {msg.message}
-            <div className="chat-timestamp">{msg.time}</div>
+        {history.map((msg) => (
+          <div key={msg.id} className={`chat-msg ${msg.sender === 'You' ? 'user' : 'bot'}`}>
+            <span className="chat-user">{msg.sender}:</span> {msg.text}
+            <div className="chat-timestamp">{msg.timestamp}</div>
           </div>
         ))}
       </div>

@@ -11,7 +11,7 @@ const io = new Server(httpserver , {
     }
 });
 
-const chatHirstory = [
+const chatHistory = [
 
 ];
 
@@ -25,13 +25,13 @@ io.on('connection', (socket) => {
     })
 
     socket.on('User', async (user_que) => {
-        chatHirstory.push({
+        chatHistory.push({
             role: 'user',
             parts: [{ text: user_que }]
         });
 
         const ai_response = await GenerateResponse(user_que);
-        chatHirstory.push({
+        chatHistory.push({
             role: 'model',
             parts: [{ text: ai_response }]
         });
